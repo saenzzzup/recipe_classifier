@@ -1,2 +1,25 @@
-# recipe_classifier
-Recipe classifier using word2vec and random forest to identify the cuisine of a recipe according to the ingredients occupied.
+# Recipe Classifier
+
+Python 3.7
+
+```bash
+pip -h
+```
+```bash
+pip install virtualenv
+```
+```bash
+virtualenv env
+```
+Mac OS / Linux
+```bash
+source mypython/bin/activate
+```
+Windows
+```bash
+mypthon\Scripts\activate
+```
+Install Requirements
+```bash
+pip install -r ./requirements.txt
+```
