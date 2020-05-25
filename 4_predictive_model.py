@@ -43,6 +43,7 @@ def makeFeatureVec(recipieIngridients, model, num_features):
     if word in index2word_set: 
       recipieIngridientsAmount = recipieIngridientsAmount + 1
       featureVec = np.add(featureVec, model.wv[word])
+      
   # Se dividen los resultados entre el numero de ingredientes
   if recipieIngridientsAmount == 0:
     recipieIngridientsAmount = 1
@@ -72,62 +73,92 @@ Contruye y entrena el modelo de Random Forest para clasificar las recetas por su
 # ENTRENAMIENTO DEL MODELO RANDOM FOREST
 
 # Llenado del random forest classifier para el entrenamiento de los datos.
-forest = RandomForestClassifier(n_estimators = 100)
 
-print("Fitting random forest to training data....")
-t0 = time.time()    
-forest.fit(f_matrix_train, trainData["cuisine"])
-t1 = time.time()
-print(f'Tiempo de ejecución de entrenamiento de Random Forest: {t1-t0}')
 
-# PRUEBA DE MODELO RANDOM FOREST
+def train_random_forest():
+  forest = RandomForestClassifier(n_estimators=10)
+  print("Fitting random forest to training data....")
+  t0 = time.time()    
+  forest.fit(f_matrix_train, trainData["cuisine"])
+  t1 = time.time()
+  print(f'Tiempo de ejecución de entrenamiento de Random Forest: {t1-t0}')
+  return forest
 
-# Predicting the sentiment values for test data and saving the results in a csv file 
-t0 = time.time()
-resultForest = forest.predict(f_matrix_test)
-t1 = time.time()
-outputForest = pd.DataFrame(data={"id":testData["id"], "cuisine":resultForest})
-print(f'Tiempo de ejecución Random Forest: {t1-t0}')
+  # PRUEBA DE MODELO RANDOM FOREST
+
+
+def test_random_forest(forest):
+  # Predicting the sentiment values for test data and saving the results in a csv file 
+  t0 = time.time()
+  resultForest = forest.predict(f_matrix_test)
+  t1 = time.time()
+  outputForest = pd.DataFrame(data={"id":testData["id"], "cuisine":resultForest})
+  print(f'Tiempo de ejecución Random Forest: {t1-t0}')
+  print("Score random forest", forest.score(f_matrix_train,trainData['cuisine']))
+
+  return outputForest
+
+
 
 """
 MLP
-Contruye y entrena el modelo de MLP para clasificar las recetas por sus ingredientes. Se utiliza una configuración de 3 capas con 100, 60 y 20 neuronas respectivamente.
+Contruye y entrena el modelo de MLP para clasificar las recetas por sus ingredientes. Se utiliza una configuración de 3 capas con 100, 60 y =20 neuronas respectivamente.
 """
-
+def train_mlp():
 # ENTRENAMIENTO DEL MODELO MLP
+  m = MLPClassifier(solver='adam', hidden_layer_sizes=(100,60,20), random_state=1)
+  print("Fitting MLP to training data....") 
+  t0 = time.time()   
+  m.fit(f_matrix_train, trainData["cuisine"])
+  t1 = time.time()
+  print(f'Tiempo de ejecución de entrenamiento MLP: {t1-t0}')
+  return m
 
-m = MLPClassifier(solver='adam', hidden_layer_sizes=(100,60,20), random_state=1)
-print("Fitting MLP to training data....") 
-t0 = time.time()   
-m.fit(f_matrix_train, trainData["cuisine"])
-t1 = time.time()
-print(f'Tiempo de ejecución de entrenamiento MLP: {t1-t0}')
 
-# PRUEBA DE MODELO MLP
 
-# Predicting the sentiment values for test data and saving the results in a csv file 
-t0 = time.time()
-resultMLP = m.predict(f_matrix_test)
-t1 = time.time()
-outputMLP = pd.DataFrame(data={"id":testData["id"], "cuisine":resultMLP})
-print(f'Tiempo de ejecución de MLP: {t1-t0}')
+  # PRUEBA DE MODELO MLP
+def test_mlp(m):
+  # Predicting the sentiment values for test data and saving the results in a csv file 
+  t0 = time.time()
+  resultMLP = m.predict(f_matrix_test)
+  t1 = time.time()
+  outputMLP = pd.DataFrame(data={"id":testData["id"], "cuisine":resultMLP})
+  print(f'Tiempo de ejecución de MLP: {t1-t0}')
+  print("Score", m.score(f_matrix_train,trainData['cuisine']))
+
+  return outputMLP
 
 """
 Evaluación
 Pruebas de evaluación entre ambos modelos (Random Forest y MLP) de acuerdo al porcentaje de precisión.
 """
 
-comparison = pd.DataFrame(data={"id":testData["id"], "Cuisine MLP":resultMLP, "Cuisine Forest":resultForest})
-comparison.head(10)
 
-m.score(f_matrix_train,trainData['cuisine'])
 
-forest.score(f_matrix_train,trainData['cuisine'])
 
-output = pd.DataFrame(data={"id":trainData["id"], "Cuisine":trainData['cuisine'], "Cuisine MLP":m.predict(f_matrix_train), "Cuisine Forest":forest.predict(f_matrix_train)})
 
-accMLP = output[output['Cuisine MLP'] == output['Cuisine']]['id'].count()/len(output)
-accForest = output[output['Cuisine Forest'] == output['Cuisine']]['id'].count()/len(output)
 
-print(f'Accuracy MLP: {accMLP}')
-print(f'Accuracy Random Forest: {accForest}')
+
+modelRF = train_random_forest()
+resultForest = test_random_forest(modelRF)
+
+
+# modelMLP = train_mlp()
+# resultMLP = test_mlp(modelMLP)
+
+
+
+# comparison = pd.DataFrame(data={"id":testData["id"], "Cuisine MLP":resultMLP, "Cuisine Forest":resultForest})
+# comparison.head(10)
+
+# m.score(f_matrix_train,trainData['cuisine'])
+
+# modelRF.score(f_matrix_train,trainData['cuisine'])
+
+# output = pd.DataFrame(data={"id":trainData["id"], "Cuisine":trainData['cuisine'], "Cuisine MLP":m.predict(f_matrix_train), "Cuisine Forest":modelRF.predict(f_matrix_train)})
+
+# accMLP = output[output['Cuisine MLP'] == output['Cuisine']]['id'].count()/len(output)
+# accForest = output[output['Cuisine Forest'] == output['Cuisine']]['id'].count()/len(output)
+
+# print(f'Accuracy MLP: {accMLP}')
+# print(f'Accuracy Random Forest: {accForest}')
