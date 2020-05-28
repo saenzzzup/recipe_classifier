@@ -25,7 +25,7 @@ sentences_train = get_sentences(trainrecipes)
 num_features = 300    # Word vector dimensionality 
 min_word_count = 3    # 50% of the corpus                    
 num_workers = 4       # Number of CPUs
-context = 10          # Context window size; let's use avg recipte size  
+context = 10          # Context window size;
 downsampling = 1e-3   # threshold for configuring which higher-frequency words are randomly downsampled
 
 # Initialize and train the model 
